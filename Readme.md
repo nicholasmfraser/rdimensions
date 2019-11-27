@@ -8,7 +8,7 @@ output: rmarkdown::github_document
 
 R client for interacting with [Dimensions](https://www.dimensions.ai/) Analytics API.
 
-## This is a work in progress
+# ------ This is a work in progress ------
 
 ## Prerequisites
 
@@ -30,7 +30,7 @@ devtools::install_github("nicholasmfraser/rdimensions")
 
 ## Usage
 
-`rdimensions` currently only supports a single function, `dimensions_raw`. 
+`rdimensions` currently only supports a single function, `dimensions_raw`. This function takes two inputs: `query` and `format`.
 
 
 
