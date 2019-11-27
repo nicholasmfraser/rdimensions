@@ -35,9 +35,9 @@ devtools::install_github("nicholasmfraser/rdimensions")
 
 ## Usage
 
-The first step to using `rdimensions` is to ensure that your dimensions
-username (most likely your email address) and password are stored in
-your .Renviron file, as follows:
+A necessary first step to using `rdimensions` is to ensure that your
+Dimensions username (most likely your email address) and password are
+stored in your .Renviron file, as follows:
 
 ``` r
 dimensions_username=your_username
