@@ -1,12 +1,12 @@
 ---
-output: rmarkdown::github_document
+output: github_document
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 # rdimensions
 
-R client for interacting with [Dimensions](https://www.dimensions.ai/) Analytics API.
+R client for interacting with the [Dimensions](https://www.dimensions.ai/) Analytics API.
 
 # ------ This is a work in progress ------
 
