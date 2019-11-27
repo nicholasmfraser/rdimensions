@@ -38,15 +38,38 @@ dimensions_username=your_username
 dimensions_password=your_password
 ```
 
-For interacting with the Dimensions Analytics API, `rdimensions` currently only supports a single function, `dimensions_raw`. This function takes two inputs: `query` and `format`.
+For interacting with the Dimensions Analytics API, `rdimensions` currently only supports a single function, `dimensions_raw`. This function takes two arguments: `query` and `format`.
 
-`query` is a Dimensions Search Language (DSL) query. Full information on the DSL structure can be found [here](https://docs.dimensions.ai/dsl/). In general, DSL queries consist of two parts, a `search` phrase, and a `return` phrase. The `search` phrase specificies the documents that we would like to know about. The `return` phrase specifies what we want to know about those documents. A simple example of a DSL query would be `search publications for "bibliometrics" return publications [doi + title + year]`. In this query, we would search all publications for those related to bibliometrics, and for any publications found, return the doi, title and year of publication. Some more examples are shown below.
+`query` is a string containing a complete Dimensions Search Language (DSL) query. Full information on the DSL structure can be found [here](https://docs.dimensions.ai/dsl/). In general, DSL queries consist of two parts, a `search` phrase, and a `return` phrase. The `search` phrase specificies the documents that we would like to know about. The `return` phrase specifies what we want to know about those documents. A simple example of a DSL query would be `search publications for "bibliometrics" return publications [doi + title + year]`. In this query, we would search all publications for those related to bibliometrics, and for any publications found, return the doi, title and year of publication.
 
 `format` specifies the format in which data should be returned, currently limited to `list` or `json` types.
 
+Some examples of potential queries are shown below. Note that when using `dimensions_raw`, any quotation marks that are necessary parts of a DSL query must be escaped by placing a backwards slash before each quotation mark, e.g. `"bibliometrics"` becomes `\"bibliometrics\"`. 
+
 ```{r eval=FALSE}
 
-dimensions_raw("search publications for \"bibliometrics\" return publications [doi + title + year]")
+# A basic query
+dimensions_raw("search publications return publications")
+
+# By default Dimensions limits results to a maximum of 20 records
+# You can increase this using the 'limit' argument, up to a maximum of 1000 records
+dimensions_raw("search publications return publications limit 500")
+
+# Search for other source types
+dimensions_raw("search grants return grants")
+dimensions_raw("search patents return patents")
+dimensions_raw("search policy_documents return policy_documents")
+dimensions_raw("search clinical_trials return clinical_trials")
+dimensions_raw("search researchers return researchers")
+
+# Apply filters
+dimensions_raw("search publications where year in [2010:2015] return publications")
+
+# Search for a specific DOI
+dimensions_raw("search publications where doi = \"10.3389/frma.2018.00023\" return publications")
+
+# Search for a keyword
+dimensions_raw("search publications for \"bibliometrics\" return publications")
 
 ```
 
