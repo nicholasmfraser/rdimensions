@@ -64,8 +64,6 @@ below.
 currently limited to `list` or `json` types.
 
 ``` r
-# Get the doi, title and publication year of publications related to bibliometrics
-# Note that quotation marks in the query string must be escaped by placing a backwards slash before the quotation mark
 dimensions_raw("search publications for \"bibliometrics\" return publications [doi + title + year]")
 ```
 
