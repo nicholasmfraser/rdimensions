@@ -4,17 +4,17 @@ Title: Client for the Dimensions Analytics API
 Description: A client for accessing, searching and performing operations
     on the Dimensions (https://www.dimensions.ai) bibliometric database.
 Version: 0.1.0
-Author: c(
-    person("Nicholas", "Fraser", role = c("aut", "cre"), 
+Authors@R: person("Nicholas", "Fraser", 
+        role = c("aut", "cre"), 
         email = "nicholasmfraser@gmail.com", 
-        comment = c(ORCID = "0000-0002-7582-6339")),
-    )
+        comment = c(ORCID = "0000-0002-7582-6339"))
 URL: https://github.com/nicholasmfraser/rdimensions
 BugReports: https://github.com/nicholasmfraser/rdimensions/issues
 License: MIT + file LICENSE
 Encoding: UTF-8
 Imports:
-    httr (>= 1.4.0)
+    httr (>= 1.4),
+    jsonlite (>= 1.5)
 RoxygenNote: 7.0.1
 Roxygen: list(markdown = TRUE)
 VignetteBuilder: knitr

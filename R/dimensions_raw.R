@@ -1,5 +1,8 @@
 #' Make a raw query request to the Dimensions Analytics API
 #'
+#'
+#' @export
+#'
 #' @param query (character) String containing a raw Dimensions Search Language
 #' query.
 #' @param format (character) The format in which data should be returned. One of
@@ -24,31 +27,64 @@
 dimensions_raw <- function(query = NULL, format = "list") {
 
   # Validate query string
-  query <- validate_query_string(query)
+  query <- validate_dimensions_query(query)
 
   # Retrieve Dimensions token
   token <- get_dimensions_token()
 
   # Submit query
-  response <- httr::POST('https://app.dimensions.ai/api/dsl.json',
-                          body = query,
-                          httr::add_headers("Authorization" = paste0("JWT ",
-                                                                     token)))
-
-  # Retrieve content
-  content <- httr::content(response, as="parsed")
+  data <- submit_dimensions_query(query, token, retry = 0)
 
   if (format == "list") {
-    data <- content
   } else if (format == "json") {
-    data <- jsonlite::toJSON(content)
+    data <- jsonlite::toJSON(data)
+  } else if (format == "dataframe") {
+    data <- jsonlite::fromJSON(jsonlite::toJSON(data))
   } else {
     stop("'format' must be one of 'list' or 'json'")
   }
   return(data)
 }
 
-validate_query_string <- function(query) {
+submit_dimensions_query <- function(query, token, retry) {
+
+  # Send query
+  r <- httr::POST("https://app.dimensions.ai/api/dsl.json",
+                  body = query,
+                  httr::add_headers("Authorization" = paste0("JWT ", token)))
+
+  # Handle responses
+  if (r$status_code == 403) {
+    if (retry == 0) {
+      print("403 Forbidden. Refreshing login token and trying again...")
+      token <- refresh_dimensions()
+      submit_dimensions_query(query, token, retry = 1)
+    } else {
+      stop(paste0("403 Forbidden.",
+                  "Please ensure credentials in your .Renviron file are correct"),
+           call. = FALSE)
+    }
+  } else if (r$status_code == 429) {
+    if (retry < 10) {
+      print("429 Too many requests. Sleeping for 30 seconds then retrying...")
+      sys.sleep(30)
+      submit_dimensions_query(query, token, retry = retry + 1)
+    } else {
+      stop("429 Too many requests. Aborting.")
+    }
+  } else if (r$status_code %in% c(200, 400, 500)) {
+    body <- httr::content(r, as="parsed")
+    if(!is.null(body$errors)) {
+      stop(paste0(gsub("[\r\n]", "", body$errors$query$header), ": ",
+                  gsub("[\r\n]", "", body$errors$query$details)),
+           call. = FALSE)
+    } else {
+      return(body)
+    }
+  }
+}
+
+validate_dimensions_query <- function(query) {
   if (identical(query, "")) stop("'query' cannot be empty", call. = F)
   if (typeof(query) != "character") stop("'query' must be a string", call. = F)
   query <- enc2utf8(query)

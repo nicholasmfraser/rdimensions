@@ -2,35 +2,45 @@
 dimensions_env <- new.env(parent=emptyenv())
 
 # Retrieve dimensions token
-# If no token is set or token is empty, attempt authentication
-get_dimensions_token <- function() {
+get_token <- function() {
+
+  # Attempt to retrieve an existing token
   token <- tryCatch(get("token", envir = dimensions_env),
                     error = function(e) NULL)
+
+  # If token does not exist, generate a new one
   if (is.null(token) || identical(token, "")) {
-    token <- tryCatch(authenticate_dimensions(),
-                      error = function(e) stop(e))
+    token <- generate_token()
   }
+
   return(token)
 }
 
-# Authenticate user with Dimensions API
-authenticate_dimensions <- function() {
-  credentials <- get_dimensions_credentials()
-  token <- request_dimensions_token(credentials)
+# Generate a new token
+generate_token <- function() {
+  credentials <- get_credentials()
+  token <- request_token(credentials)
+  return(token)
+}
+
+# Refresh a token if no longer valid
+refresh_token <- function() {
+  destroy_token()
+  token <- generate_token()
   return(token)
 }
 
 # Dimensions API credentials
-get_dimensions_credentials <- function() {
+get_credentials <- function() {
   credentials <- list(
-    "username" = get_dimensions_username(),
-    "password" = get_dimensions_password()
+    "username" = get_username(),
+    "password" = get_password()
   )
   return(credentials)
 }
 
 # Retrieve Dimensions username from .Renviron file
-get_dimensions_username <- function() {
+get_username <- function() {
   username <- Sys.getenv("dimensions_username")
   if (identical(username, "")) {
     stop("Your Dimensions username must be defined in .Renviron file")
@@ -40,7 +50,7 @@ get_dimensions_username <- function() {
 }
 
 # Retrieve Dimensions password from .Renviron file
-get_dimensions_password <- function() {
+get_password <- function() {
   password <- Sys.getenv("dimensions_password")
   if (identical(password, "")) {
     stop("Your Dimensions password must be defined in .Renviron file")
@@ -50,24 +60,36 @@ get_dimensions_password <- function() {
 }
 
 # Request token from API endpoint
-request_dimensions_token <- function(credentials) {
+request_token <- function(credentials) {
+
+  # Make request to server
   response <- httr::POST("https://app.dimensions.ai/api/auth.json",
                          body = credentials,
                          encode = "json")
+
+  # Retrieve status code
   status <- response$status_code
+
+  # Handle response
   if(status == 200){
     token <- httr::content(response, as="parsed")$token
-    assign("token", token, envir=dimensions_env)
+    store_token(token)
     return(token)
   } else {
-    stop(dimensions_status_codes[as.character(status)])
+    stop(httr::http_status(response)$message)
   }
 }
 
-# Potential status codes that can be returned by Dimensions API
-dimensions_status_codes <- c(
-  "200: OK",
-  "401: Authorization failed. Please check credentials in your .Renviron file",
-  "500: Internal Server error. Please try again later"
-)
-names(dimensions_status_codes) <- c("200", "401", "500")
+# Store token
+store_token <- function(token) {
+  assign("token", token, envir=dimensions_env)
+}
+
+# Destroy token
+destroy_token <- function() {
+  token <- tryCatch(get("token", envir = dimensions_env),
+                    error = function(e) NULL)
+  if (!is.null(token)) {
+    remove("token", envir = dimensions_env)
+  }
+}
