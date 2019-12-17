@@ -6,7 +6,7 @@
 R client for interacting with the
 [Dimensions](https://www.dimensions.ai/) Analytics API.
 
-# —— This is a work in progress ——
+\*\* Work in progress \*\*
 
 ## Prerequisites
 
@@ -33,35 +33,54 @@ install.packages("devtools")
 devtools::install_github("nicholasmfraser/rdimensions")
 ```
 
-## Usage
+## Authentication
 
-A necessary first step to using `rdimensions` is to ensure that your
-Dimensions username (most likely your email address) and password are
-stored in your .Renviron file, as follows:
+Prior to making any queries, you must use your Dimensions credentials to
+retrieve an access token which will be stored in your session for
+following queries. You can login using the `dimensions_login()`
+function, which takes a list of credentials (username and password) as
+arguments:
+
+``` r
+dimensions_login(credentials = list(
+  "username" = "your_username",
+  "password" = "your_password"
+))
+```
+
+Alternatively, you can store your username and password in your
+.Renviron file, as follows:
 
 ``` r
 dimensions_username=your_username
 dimensions_password=your_password
 ```
 
+You can then login simply with the command ‘dim\_login()’, which will
+automatically extract your credentials from your .Renviron file.
+
+## Queries
+
 For interacting with the Dimensions Analytics API, `rdimensions`
-currently only supports a single function, `dimensions_raw`. This
-function takes two arguments: `query` and `format`.
+currently provides two main functions: `dim_query` and `dim_iterate`.
 
-`query` is a string containing a complete Dimensions Search Language
-(DSL) query. Full information on the DSL structure can be found
-[here](https://docs.dimensions.ai/dsl/). In general, DSL queries consist
-of two parts, a `search` phrase, and a `return` phrase. The `search`
-phrase specificies the documents that we would like to know about. The
-`return` phrase specifies what we want to know about those documents. A
-simple example of a DSL query would be `search publications for
-"bibliometrics" return publications [doi + title + year]`. In this
-query, we would search all publications for those related to
-bibliometrics, and for any publications found, return the doi, title and
-year of publication.
+This function takes two arguments: `query` and `format`:
 
-`format` specifies the format in which data should be returned,
-currently limited to `list` or `json` types.
+  - `query` is a string containing a complete Dimensions Search Language
+    (DSL) query. Full information on the DSL structure can be found
+    [here](https://docs.dimensions.ai/dsl/). In general, DSL queries
+    consist of two parts, a `search` phrase, and a `return` phrase. The
+    `search` phrase specificies the documents that we would like to know
+    about. The `return` phrase specifies what we want to know about
+    those documents. A simple example of a DSL query would be `search
+    publications for "bibliometrics" return publications [doi + title +
+    year]`. In this query, we would search all publications for those
+    related to bibliometrics, and for any publications found, return the
+    doi, title and year of publication.
+
+  - `format` specifies the format in which data should be returned,
+    currently limited to `list` or `json` types. The default format is
+    `list`.
 
 Some examples of potential queries are shown below. Note that when using
 `dimensions_raw`, any quotation marks that are necessary parts of a DSL
@@ -71,6 +90,9 @@ mark, e.g. `"bibliometrics"` becomes `\"bibliometrics\"`.
 ``` r
 # A basic query
 dimensions_raw("search publications return publications")
+
+# Return data in JSON format
+dimensions_raw("search publications return publications", format = "json")
 
 # By default Dimensions limits results to a maximum of 20 records
 # You can increase this using the 'limit' argument, up to a maximum of 1000 records
