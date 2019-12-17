@@ -1,36 +1,16 @@
 # Define environment for storing tokens
 dimensions_env <- new.env(parent=emptyenv())
 
-# Retrieve dimensions token
-get_token <- function() {
-
-  # Attempt to retrieve an existing token
-  token <- tryCatch(get("token", envir = dimensions_env),
-                    error = function(e) NULL)
-
-  # If token does not exist, generate a new one
-  if (is.null(token) || identical(token, "")) {
-    token <- generate_token()
+# Log in to dimensions and generate a new authentication token
+dimensions_login <- function(credentials = NULL) {
+  if(is.null(credentials)) {
+    credentials <- get_credentials()
   }
-
-  return(token)
-}
-
-# Generate a new token
-generate_token <- function() {
-  credentials <- get_credentials()
   token <- request_token(credentials)
-  return(token)
+  message("Logged in with token: ", token)
 }
 
-# Refresh a token if no longer valid
-refresh_token <- function() {
-  destroy_token()
-  token <- generate_token()
-  return(token)
-}
-
-# Dimensions API credentials
+# Retrieve Dimensions API credentials
 get_credentials <- function() {
   credentials <- list(
     "username" = get_username(),
@@ -59,7 +39,7 @@ get_password <- function() {
   }
 }
 
-# Request token from API endpoint
+# Request token
 request_token <- function(credentials) {
 
   # Make request to server
@@ -85,6 +65,13 @@ store_token <- function(token) {
   assign("token", token, envir=dimensions_env)
 }
 
+# Refresh a token if no longer valid
+refresh_token <- function() {
+  destroy_token()
+  token <- request_token()
+  return(token)
+}
+
 # Destroy token
 destroy_token <- function() {
   token <- tryCatch(get("token", envir = dimensions_env),
@@ -92,4 +79,15 @@ destroy_token <- function() {
   if (!is.null(token)) {
     remove("token", envir = dimensions_env)
   }
+}
+
+# Retrieve an existing dimensions token
+fetch_token <- function() {
+
+  # Attempt to retrieve an existing token
+  token <- tryCatch(get("token", envir = dimensions_env),
+                    error = function(e) stop("Invalid authentication token. Please ensure you are logged in using 'dimensions_login()' before querying.",
+                                             call. = FALSE))
+
+  return(token)
 }
