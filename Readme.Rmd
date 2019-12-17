@@ -8,7 +8,7 @@ output: rmarkdown::github_document
 
 R client for interacting with the [Dimensions](https://www.dimensions.ai/) Analytics API.
 
-# ------ This is a work in progress ------
+** Work in progress **
 
 ## Prerequisites
 
@@ -29,16 +29,38 @@ devtools::install_github("nicholasmfraser/rdimensions")
 
 ```
 
-## Usage
+## Authentication
 
-A necessary first step to using `rdimensions` is to ensure that your Dimensions username (most likely your email address) and password are stored in your .Renviron file, as follows:
+Prior to making any queries, you must use your Dimensions credentials to retrieve an access token which will be stored in your session for following queries. You can login using the `dimensions_login()` function, which takes a list of credentials (username and password) as arguments:
 
 ```{r eval=FALSE}
-dimensions_username=your_username
-dimensions_password=your_password
+
+dimensions_login(credentials = list(
+  "username" = "your_username",
+  "password" = "your_password"
+))
+
 ```
 
-For interacting with the Dimensions Analytics API, `rdimensions` currently supports a single function, `dimensions_raw`. This function takes two arguments: `query` and `format`:
+Alternatively, you can store your username and password in your .Renviron file, as follows:
+
+```{r eval=FALSE}
+
+dimensions_username=your_username
+dimensions_password=your_password
+
+```
+
+You can then login simply with the command 'dim_login()', which will automatically extract your credentials from your .Renviron file.
+
+## Queries
+
+For interacting with the Dimensions Analytics API, `rdimensions` currently provides two main functions: `dim_query` and `dim_iterate`. 
+
+
+
+
+This function takes two arguments: `query` and `format`:
 
 * `query` is a string containing a complete Dimensions Search Language (DSL) query. Full information on the DSL structure can be found [here](https://docs.dimensions.ai/dsl/). In general, DSL queries consist of two parts, a `search` phrase, and a `return` phrase. The `search` phrase specificies the documents that we would like to know about. The `return` phrase specifies what we want to know about those documents. A simple example of a DSL query would be `search publications for "bibliometrics" return publications [doi + title + year]`. In this query, we would search all publications for those related to bibliometrics, and for any publications found, return the doi, title and year of publication.
 
