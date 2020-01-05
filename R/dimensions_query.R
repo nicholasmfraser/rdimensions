@@ -52,7 +52,27 @@ dim_query <- function(query = NULL, format = "list") {
   }
 }
 
-do_query <- function(query, token, retry) {
+dimensions_iterate <- function(query = NULL, format = "list") {
+
+  # Retrieve Dimensions token
+  token <- fetch_token()
+
+  # Validate query string
+  query <- validate_query(query)
+
+  # Submit query
+  data <- do_query(query, token, retry = 0)
+
+  if (format == "list") {
+    return(data)
+  } else if (format == "json") {
+    return(jsonlite::toJSON(data))
+  } else {
+    stop("'format' must be one of 'list' or 'json'")
+  }
+}
+
+do_query <- function(query, token, skip = NULL, limit = NULL, retry = 0) {
 
   # Make request
   r <- httr::POST("https://app.dimensions.ai/api/dsl.json",
