@@ -37,24 +37,19 @@ dimensions_query <- function(query = NULL, format = "list") {
   # Retrieve Dimensions token
   token <- fetch_token()
 
-  # Validate query string
-  query <- validate_query(query)
+  # Validate arguments
+  validate(query, format)
 
   # Submit query
-  data <- do_query(query, format, token, retry = 0)
+  data <- do_query(query, token, retry = 0)
 
-  if (format == "list") {
-    return(data)
-  } else if (format == "json") {
-    return(jsonlite::toJSON(data))
-  } else {
-    stop("'format' must be one of 'list' or 'json'")
-  }
+  return_data(data, format)
+
 }
 
-do_query <- function(query, format, token, retry = 0) {
+do_query <- function(query, token, retry = 0) {
 
-  # Cancel if too many retries
+  # Stop if too many retries
   if(retry > 10) {
     stop("Too many retries.", call. = FALSE)
   }
@@ -78,16 +73,16 @@ do_query <- function(query, format, token, retry = 0) {
     retry <- retry + 1
     do_query(query, token, retry)
   } else if (r$status_code %in% c(200, 400, 500)) {
-    body <- httr::content(r, as="parsed")
-    if(!is.null(body$errors)) {
-      stop(paste0(gsub("[\r\n]", "", body$errors$query$header), ": ",
-                  gsub("[\r\n]", "", body$errors$query$details)),
+    data <- httr::content(r, as="parsed")
+    if(!is.null(data$errors)) {
+      stop(paste0(gsub("[\r\n]", "", data$errors$query$header), ": ",
+                  gsub("[\r\n]", "", data$errors$query$details)),
            call. = FALSE)
     }
   } else {
     stop(r$status_code)
   }
 
-  return_data(body, format)
+  return(data)
 
 }
