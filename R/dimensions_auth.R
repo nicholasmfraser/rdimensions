@@ -30,7 +30,7 @@
 #'
 #' A full overview of query syntax can be found in the [Dimensions Search
 #' Language](https://docs.dimensions.ai/dsl/) documentation.
-dimensions_login <- function(credentials = NULL) {
+dim_login <- function(credentials = NULL) {
   if(is.null(credentials)) {
     credentials <- get_credentials()
   }
@@ -39,7 +39,7 @@ dimensions_login <- function(credentials = NULL) {
 }
 
 # Define environment for storing tokens
-dimensions_env <- new.env(parent=emptyenv())
+dim_env <- new.env(parent=emptyenv())
 
 # Retrieve Dimensions API credentials
 get_credentials <- function() {

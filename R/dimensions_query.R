@@ -32,7 +32,7 @@
 #'
 #' A full overview of query syntax can be found in the [Dimensions Search
 #' Language](https://docs.dimensions.ai/dsl/) documentation.
-dimensions_query <- function(query = NULL, format = "list") {
+dim_query <- function(query = NULL, format = "list") {
 
   # Retrieve Dimensions token
   token <- fetch_token()
@@ -80,11 +80,4 @@ do_query <- function(query, token, retry) {
   } else {
     stop(r$status_code)
   }
-}
-
-validate_query <- function(query) {
-  if (identical(query, "")) stop("query is empty", call. = F)
-  if (typeof(query) != "character") stop("query must be a string", call. = F)
-  query <- enc2utf8(query)
-  return(query)
 }
