@@ -2,7 +2,7 @@
 % Please edit documentation in R/dimensions_query.R
 \name{dimensions_query}
 \alias{dimensions_query}
-\title{Make a raw query request to the Dimensions Analytics API}
+\title{Make a basic query request to the Dimensions Analytics API}
 \usage{
 dimensions_query(query = NULL, format = "list")
 }
@@ -14,7 +14,7 @@ query.}
 "list" or "json"}
 }
 \description{
-Make a raw query request to the Dimensions Analytics API
+Make a basic query request to the Dimensions Analytics API
 }
 \examples{
 # The most basic query: search and return all publications
@@ -32,10 +32,10 @@ dimensions_query(query = "search publications return publications limit 100")
 be escaped by placing a backwards slash (\) in front of the quotation marks.
 You may find the `paste` and `paste0` functions helpful to build longer query
 strings.
-query <- paste0("search publications",
-                              "where doi = \"10.3389/frma.2018.00023\"",
-                              "return publications")
-dimensions_query(query = query)
+my_query <- paste0("search publications",
+                   "where doi = \"10.3389/frma.2018.00023\"",
+                   "return publications")
+dimensions_query(query = my_query)
 
 
 

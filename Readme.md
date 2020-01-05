@@ -6,12 +6,17 @@
 R client for interacting with the
 [Dimensions](https://www.dimensions.ai/) Analytics API.
 
-\*\* Work in progress \*\*
+Inspired by the [Dimcli python
+client](https://github.com/digital-science/dimcli).
+
+## Notes
+
+This is a work in progress and subject to change.
 
 ## Prerequisites
 
 Access to the Dimensions Analytics API requires that you have a
-Dimensions account with the necessary authorization priviledges.
+Dimensions account with the necessary authorization privileges.
 
 At the current time, Dimensions offers free access to the Analytics API
 for scientometric researchers and research projects. To apply for free
@@ -29,17 +34,19 @@ provide no-cost access to all ISSI members directly.
 Install the development version from Github:
 
 ``` r
+# Install package
 install.packages("devtools")
 devtools::install_github("nicholasmfraser/rdimensions")
+
+# Load package
+library(rdimensions)
 ```
 
 ## Authentication
 
-Prior to making any queries, you must use your Dimensions credentials to
-retrieve an access token which will be stored in your session for
-following queries. You can login using the `dimensions_login()`
-function, which takes a list of credentials (username and password) as
-arguments:
+Prior to making any queries, you must login with your Dimensions
+credentials. You can login using the `dimensions_login()` function,
+which takes a list of credentials (username and password) as arguments:
 
 ``` r
 dimensions_login(credentials = list(
@@ -56,13 +63,21 @@ dimensions_username=your_username
 dimensions_password=your_password
 ```
 
-You can then login simply with the command ‘dim\_login()’, which will
-automatically extract your credentials from your .Renviron file.
+You can then login simply with the command `dimensions_login()`, without
+manually supplying your credentials.
+
+By default, login tokens expire after 24 hours. Should you wish to
+logout and remove your login token from your R session, use the function
+`dimensions_logout()`;
+
+``` r
+dimensions_logout()
+```
 
 ## Queries
 
 For interacting with the Dimensions Analytics API, `rdimensions`
-currently provides two main functions: `dim_query` and `dim_iterate`.
+currently provides a single basic function: `dimensions_query()`.
 
 This function takes two arguments: `query` and `format`:
 
@@ -83,39 +98,45 @@ This function takes two arguments: `query` and `format`:
     `list`.
 
 Some examples of potential queries are shown below. Note that when using
-`dimensions_raw`, any quotation marks that are necessary parts of a DSL
-query must be escaped by placing a backwards slash before each quotation
-mark, e.g. `"bibliometrics"` becomes `\"bibliometrics\"`.
+`dimensions_query`, any quotation marks that are necessary parts of a
+DSL query must be escaped by placing a backwards slash before each
+quotation mark, e.g. `"bibliometrics"` becomes `\"bibliometrics\"`.
 
 ``` r
 # A basic query
-dimensions_raw("search publications return publications")
+dimensions_query("search publications return publications")
 
-# Return data in JSON format
-dimensions_raw("search publications return publications", format = "json")
+# By default, data is return in a list format. You may instead return data in 
+# JSON format, by specifying the 'format' argument
+dimensions_query("search publications return publications", format = "json")
 
 # By default Dimensions limits results to a maximum of 20 records
 # You can increase this using the 'limit' argument, up to a maximum of 1000 records
-dimensions_raw("search publications return publications limit 500")
+dimensions_query("search publications return publications limit 500")
 
 # Search for other source types
-dimensions_raw("search grants return grants")
-dimensions_raw("search patents return patents")
-dimensions_raw("search policy_documents return policy_documents")
-dimensions_raw("search clinical_trials return clinical_trials")
-dimensions_raw("search researchers return researchers")
+dimensions_query("search grants return grants")
+dimensions_query("search patents return patents")
+dimensions_query("search policy_documents return policy_documents")
+dimensions_query("search clinical_trials return clinical_trials")
+dimensions_query("search researchers return researchers")
 
 # Apply filters
-dimensions_raw("search publications where year in [2010:2015] return publications")
+dimensions_query("search publications where year in [2010:2015] return publications")
 
-# Search for a specific DOI
-dimensions_raw("search publications where doi = \"10.3389/frma.2018.00023\" return publications")
+# Search for a specific DOI. Note that quotation marks within a query string
+# must be escaped with a backslash ("\")
+dimensions_query("search publications where doi = \"10.3389/frma.2018.00023\" return publications")
 
 # Search for a keyword
-dimensions_raw("search publications for \"bibliometrics\" return publications")
+dimensions_query("search publications for \"bibliometrics\" return publications")
 ```
 
 ## Roadmap
+
+  - Add functionality for iterating over large query result sets
+  - Add more examples
+  - Add validation and tests
 
 ## Collaboration
 

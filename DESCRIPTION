@@ -1,6 +1,6 @@
 Package: rdimensions
 Type: Package
-Title: Client for the Dimensions Analytics API
+Title: R Client for the Dimensions Analytics API
 Description: A client for accessing, searching and performing operations
     on the Dimensions (https://www.dimensions.ai) bibliometric database.
 Version: 0.1.0

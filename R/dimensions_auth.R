@@ -2,35 +2,21 @@
 #'
 #' @export
 #'
-#' @param credentials (list) List of user credentials, including username (email)
-#' and password
+#' @param credentials (list) List of user credentials, including username
+#' (email) and password. To avoid providing a manual list each time, you may
+#' instead add your credentials to your .Renviron file. These should be named
+#' `dimensions_username` and `dimensions_password`. `dimensions_login()` will
+#' then use these credentials automatically to login.
 #'
 #' @examples
-#' # The most basic query: search and return all publications
-#' dimensions_query(query = "search publications return publications")
+#' # Login with a list of credentials
+#' dimensions_login(credentials = list(
+#'     "username" = "your_username",
+#'     "password" = "your_password"))
 #'
-#' # Return results in JSON format
-#' dimensions_query(query = "search publications return publications",
-#' format = "json")
-#'
-#' # Dimensions automatically limits results to 20 records. Add a "limit" clause
-#' to increase the number of returned results
-#' dimensions_query(query = "search publications return publications limit 100")
-#'
-#' # Search for a specific DOI. Note that quotation marks surrounding DOIs must
-#' be escaped by placing a backwards slash (\) in front of the quotation marks.
-#' You may find the `paste` and `paste0` functions helpful to build longer query
-#' strings.
-#' query <- paste0("search publications",
-#'                               "where doi = \"10.3389/frma.2018.00023\"",
-#'                               "return publications")
-#' dimensions_query(query = query)
-#'
-#'
-#'
-#' A full overview of query syntax can be found in the [Dimensions Search
-#' Language](https://docs.dimensions.ai/dsl/) documentation.
-dim_login <- function(credentials = NULL) {
+#' Alternatively with credentials added to .Renviron file:
+#' dimensions_login()
+dimensions_login <- function(credentials = NULL) {
   if(is.null(credentials)) {
     credentials <- get_credentials()
   }
@@ -38,8 +24,21 @@ dim_login <- function(credentials = NULL) {
   message("Logged in with token: ", token)
 }
 
+#' Logout of the Dimensions Analytics API
+#'
+#' @export
+#'
+#' @examples
+#' # Logout and destroy existing login token
+#' dimensions_logout()
+
+dimensions_logout <- function() {
+  destroy_token()
+  message("Successfully logged out.")
+}
+
 # Define environment for storing tokens
-dim_env <- new.env(parent=emptyenv())
+dimensions_env <- new.env(parent=emptyenv())
 
 # Retrieve Dimensions API credentials
 get_credentials <- function() {

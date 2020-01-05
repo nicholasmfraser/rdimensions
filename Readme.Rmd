@@ -8,9 +8,11 @@ output: rmarkdown::github_document
 
 R client for interacting with the [Dimensions](https://www.dimensions.ai/) Analytics API.
 
-Inspired by the [Dimcli python client](https://github.com/digital-science/dimcli)
+Inspired by the [Dimcli python client](https://github.com/digital-science/dimcli).
 
-** Work in progress **
+## Notes
+
+This is a work in progress and subject to change.
 
 ## Prerequisites
 
@@ -26,12 +28,12 @@ Install the development version from Github:
 
 ```{r eval=FALSE}
 
+# Install package
 install.packages("devtools")
 devtools::install_github("nicholasmfraser/rdimensions")
 
-# current install with private credentials - use token c68300163e025ce67bd912e357e269e3e8054e4e 
-
-
+# Load package
+library(rdimensions)
 ```
 
 ## Authentication
@@ -58,9 +60,17 @@ dimensions_password=your_password
 
 You can then login simply with the command `dimensions_login()`, without manually supplying your credentials.
 
+By default, login tokens expire after 24 hours. Should you wish to logout and remove your login token from your R session, use the function `dimensions_logout()`;
+
+```{r eval=FALSE}
+
+dimensions_logout()
+
+```
+
 ## Queries
 
-For interacting with the Dimensions Analytics API, `rdimensions` currently provides two main functions: `dimensions_query()` and `dimensions_iterate()`. The difference between these functions is that `dimensions_query()` will make a single query request and retrieve the first page of results. Dimensions limits the number of records returned for a single query to 1000. For queries where you wish to retrieve a larger number of records, you can instead use `dimensions_iterate()` to iterate through multiple results pages, and return all results in a single object.
+For interacting with the Dimensions Analytics API, `rdimensions` currently provides a single basic function: `dimensions_query()`. 
 
 This function takes two arguments: `query` and `format`:
 
@@ -68,39 +78,45 @@ This function takes two arguments: `query` and `format`:
 
 * `format` specifies the format in which data should be returned, currently limited to `list` or `json` types. The default format is `list`.
 
-Some examples of potential queries are shown below. Note that when using `dimensions_raw`, any quotation marks that are necessary parts of a DSL query must be escaped by placing a backwards slash before each quotation mark, e.g. `"bibliometrics"` becomes `\"bibliometrics\"`. 
+Some examples of potential queries are shown below. Note that when using `dimensions_query`, any quotation marks that are necessary parts of a DSL query must be escaped by placing a backwards slash before each quotation mark, e.g. `"bibliometrics"` becomes `\"bibliometrics\"`.
 
 ```{r eval=FALSE}
 
 # A basic query
-dimensions_raw("search publications return publications")
+dimensions_query("search publications return publications")
 
-# Return data in JSON format
-dimensions_raw("search publications return publications", format = "json")
+# By default, data is return in a list format. You may instead return data in 
+# JSON format, by specifying the 'format' argument
+dimensions_query("search publications return publications", format = "json")
 
 # By default Dimensions limits results to a maximum of 20 records
 # You can increase this using the 'limit' argument, up to a maximum of 1000 records
-dimensions_raw("search publications return publications limit 500")
+dimensions_query("search publications return publications limit 500")
 
 # Search for other source types
-dimensions_raw("search grants return grants")
-dimensions_raw("search patents return patents")
-dimensions_raw("search policy_documents return policy_documents")
-dimensions_raw("search clinical_trials return clinical_trials")
-dimensions_raw("search researchers return researchers")
+dimensions_query("search grants return grants")
+dimensions_query("search patents return patents")
+dimensions_query("search policy_documents return policy_documents")
+dimensions_query("search clinical_trials return clinical_trials")
+dimensions_query("search researchers return researchers")
 
 # Apply filters
-dimensions_raw("search publications where year in [2010:2015] return publications")
+dimensions_query("search publications where year in [2010:2015] return publications")
 
-# Search for a specific DOI
-dimensions_raw("search publications where doi = \"10.3389/frma.2018.00023\" return publications")
+# Search for a specific DOI. Note that quotation marks within a query string
+# must be escaped with a backslash ("\")
+dimensions_query("search publications where doi = \"10.3389/frma.2018.00023\" return publications")
 
 # Search for a keyword
-dimensions_raw("search publications for \"bibliometrics\" return publications")
+dimensions_query("search publications for \"bibliometrics\" return publications")
 
 ```
 
 ## Roadmap
+
+* Add functionality for iterating over large query result sets
+* Add more examples
+* Add validation and tests
 
 ## Collaboration
 

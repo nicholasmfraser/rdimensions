@@ -1,5 +1,4 @@
-#' Make a raw query request to the Dimensions Analytics API
-#'
+#' Make a basic query request to the Dimensions Analytics API
 #'
 #' @export
 #'
@@ -23,16 +22,17 @@
 #' be escaped by placing a backwards slash (\) in front of the quotation marks.
 #' You may find the `paste` and `paste0` functions helpful to build longer query
 #' strings.
-#' query <- paste0("search publications",
-#'                               "where doi = \"10.3389/frma.2018.00023\"",
-#'                               "return publications")
-#' dimensions_query(query = query)
+#' my_query <- paste0("search publications",
+#'                    "where doi = \"10.3389/frma.2018.00023\"",
+#'                    "return publications")
+#' dimensions_query(query = my_query)
 #'
 #'
 #'
 #' A full overview of query syntax can be found in the [Dimensions Search
 #' Language](https://docs.dimensions.ai/dsl/) documentation.
-dim_query <- function(query = NULL, format = "list") {
+
+dimensions_query <- function(query = NULL, format = "list") {
 
   # Retrieve Dimensions token
   token <- fetch_token()
@@ -41,7 +41,7 @@ dim_query <- function(query = NULL, format = "list") {
   query <- validate_query(query)
 
   # Submit query
-  data <- do_query(query, token, retry = 0)
+  data <- do_query(query, format, token, retry = 0)
 
   if (format == "list") {
     return(data)
@@ -52,41 +52,30 @@ dim_query <- function(query = NULL, format = "list") {
   }
 }
 
-dimensions_iterate <- function(query = NULL, format = "list") {
+do_query <- function(query, format, token, retry = 0) {
 
-  # Retrieve Dimensions token
-  token <- fetch_token()
-
-  # Validate query string
-  query <- validate_query(query)
-
-  # Submit query
-  data <- do_query(query, token, retry = 0)
-
-  if (format == "list") {
-    return(data)
-  } else if (format == "json") {
-    return(jsonlite::toJSON(data))
-  } else {
-    stop("'format' must be one of 'list' or 'json'")
+  # Cancel if too many retries
+  if(retry > 10) {
+    stop("Too many retries.", call. = FALSE)
   }
-}
-
-do_query <- function(query, token, skip = NULL, limit = NULL, retry = 0) {
 
   # Make request
   r <- httr::POST("https://app.dimensions.ai/api/dsl.json",
                   body = query,
                   httr::add_headers("Authorization" = paste0("JWT ", token)))
 
+
   # Handle responses
   if (r$status_code == 403) {
-    message("403 Forbidden: Login token expired. Refreshing login token and trying again...")
+    message(paste0("403 Forbidden: Login token expired. ",
+            "Refreshing login token and trying again..."))
     token <- refresh_token()
+    retry <- retry + 1
     do_query(query, token, retry)
   } else if (r$status_code == 429) {
     message("429 Too many requests. Sleeping for 30 seconds then retrying...")
     sys.sleep(30)
+    retry <- retry + 1
     do_query(query, token, retry)
   } else if (r$status_code %in% c(200, 400, 500)) {
     body <- httr::content(r, as="parsed")
@@ -94,10 +83,11 @@ do_query <- function(query, token, skip = NULL, limit = NULL, retry = 0) {
       stop(paste0(gsub("[\r\n]", "", body$errors$query$header), ": ",
                   gsub("[\r\n]", "", body$errors$query$details)),
            call. = FALSE)
-    } else {
-      return(body)
     }
   } else {
     stop(r$status_code)
   }
+
+  return_data(body, format)
+
 }
