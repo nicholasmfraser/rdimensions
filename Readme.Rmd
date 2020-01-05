@@ -8,11 +8,13 @@ output: rmarkdown::github_document
 
 R client for interacting with the [Dimensions](https://www.dimensions.ai/) Analytics API.
 
+Inspired by the [Dimcli python client](https://github.com/digital-science/dimcli)
+
 ** Work in progress **
 
 ## Prerequisites
 
-Access to the Dimensions Analytics API requires that you have a Dimensions account with the necessary authorization priviledges.
+Access to the Dimensions Analytics API requires that you have a Dimensions account with the necessary authorization privileges.
 
 At the current time, Dimensions offers free access to the Analytics API for scientometric researchers and research projects. To apply for free access, visit [this page](https://www.dimensions.ai/scientometric-research/) and click on 'request access'. You will be required to fill in an application to request no-cost use of Dimensions.
 
@@ -27,11 +29,14 @@ Install the development version from Github:
 install.packages("devtools")
 devtools::install_github("nicholasmfraser/rdimensions")
 
+# current install with private credentials - use token c68300163e025ce67bd912e357e269e3e8054e4e 
+
+
 ```
 
 ## Authentication
 
-Prior to making any queries, you must use your Dimensions credentials to retrieve an access token which will be stored in your session for following queries. You can login using the `dimensions_login()` function, which takes a list of credentials (username and password) as arguments:
+Prior to making any queries, you must login with your Dimensions credentials. You can login using the `dimensions_login()` function, which takes a list of credentials (username and password) as arguments:
 
 ```{r eval=FALSE}
 
@@ -51,14 +56,11 @@ dimensions_password=your_password
 
 ```
 
-You can then login simply with the command 'dim_login()', which will automatically extract your credentials from your .Renviron file.
+You can then login simply with the command `dimensions_login()`, without manually supplying your credentials.
 
 ## Queries
 
-For interacting with the Dimensions Analytics API, `rdimensions` currently provides two main functions: `dim_query` and `dim_iterate`. 
-
-
-
+For interacting with the Dimensions Analytics API, `rdimensions` currently provides two main functions: `dimensions_query()` and `dimensions_iterate()`. The difference between these functions is that `dimensions_query()` will make a single query request and retrieve the first page of results. Dimensions limits the number of records returned for a single query to 1000. For queries where you wish to retrieve a larger number of records, you can instead use `dimensions_iterate()` to iterate through multiple results pages, and return all results in a single object.
 
 This function takes two arguments: `query` and `format`:
 

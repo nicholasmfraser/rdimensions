@@ -1,7 +1,35 @@
-# Define environment for storing tokens
-dimensions_env <- new.env(parent=emptyenv())
-
-# Log in to dimensions and generate a new authentication token
+#' Login to the Dimensions Analytics API
+#'
+#' @export
+#'
+#' @param credentials (list) List of user credentials, including username (email)
+#' and password
+#'
+#' @examples
+#' # The most basic query: search and return all publications
+#' dimensions_query(query = "search publications return publications")
+#'
+#' # Return results in JSON format
+#' dimensions_query(query = "search publications return publications",
+#' format = "json")
+#'
+#' # Dimensions automatically limits results to 20 records. Add a "limit" clause
+#' to increase the number of returned results
+#' dimensions_query(query = "search publications return publications limit 100")
+#'
+#' # Search for a specific DOI. Note that quotation marks surrounding DOIs must
+#' be escaped by placing a backwards slash (\) in front of the quotation marks.
+#' You may find the `paste` and `paste0` functions helpful to build longer query
+#' strings.
+#' query <- paste0("search publications",
+#'                               "where doi = \"10.3389/frma.2018.00023\"",
+#'                               "return publications")
+#' dimensions_query(query = query)
+#'
+#'
+#'
+#' A full overview of query syntax can be found in the [Dimensions Search
+#' Language](https://docs.dimensions.ai/dsl/) documentation.
 dimensions_login <- function(credentials = NULL) {
   if(is.null(credentials)) {
     credentials <- get_credentials()
@@ -9,6 +37,9 @@ dimensions_login <- function(credentials = NULL) {
   token <- request_token(credentials)
   message("Logged in with token: ", token)
 }
+
+# Define environment for storing tokens
+dimensions_env <- new.env(parent=emptyenv())
 
 # Retrieve Dimensions API credentials
 get_credentials <- function() {
