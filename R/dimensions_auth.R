@@ -20,6 +20,7 @@ dimensions_login <- function(credentials = NULL) {
   if(is.null(credentials)) {
     credentials <- get_credentials()
   }
+  store_credentials(credentials)
   token <- request_token(credentials)
   message("Logged in with token: ", token)
 }
@@ -38,7 +39,7 @@ dimensions_logout <- function() {
 }
 
 # Define environment for storing tokens
-dimensions_env <- new.env(parent=emptyenv())
+dimensions_env <- new.env(parent = emptyenv())
 
 # Retrieve Dimensions API credentials
 get_credentials <- function() {
@@ -47,6 +48,11 @@ get_credentials <- function() {
     "password" = get_password()
   )
   return(credentials)
+}
+
+# Store credentials. Necessary for auto-refreshing of expired tokens
+store_credentials <- function(credentials) {
+  assign("credentials", credentials, envir = dimensions_env)
 }
 
 # Retrieve Dimensions username from .Renviron file
@@ -71,18 +77,15 @@ get_password <- function() {
 
 # Request token
 request_token <- function(credentials) {
-
   # Make request to server
   response <- httr::POST("https://app.dimensions.ai/api/auth.json",
                          body = credentials,
                          encode = "json")
-
   # Retrieve status code
   status <- response$status_code
-
   # Handle response
   if(status == 200){
-    token <- httr::content(response, as="parsed")$token
+    token <- httr::content(response, as = "parsed")$token
     store_token(token)
     return(token)
   } else {
@@ -92,14 +95,17 @@ request_token <- function(credentials) {
 
 # Store token
 store_token <- function(token) {
-  assign("token", token, envir=dimensions_env)
+  assign("token", token, envir = dimensions_env)
 }
 
-# Refresh a token if no longer valid
+# Refresh an expired token
 refresh_token <- function() {
   destroy_token()
-  token <- request_token()
-  return(token)
+  credentials <- tryCatch(get("credentials", envir = dimensions_env),
+                          error = function(e) stop("Login credentials not found. Ensure you are logged in using 'dimensions_login()' and try again",
+                                                   call. = FALSE))
+  token <- request_token(credentials)
+  message("Token refreshed. New token: ", token)
 }
 
 # Destroy token
@@ -113,11 +119,9 @@ destroy_token <- function() {
 
 # Retrieve an existing dimensions token
 fetch_token <- function() {
-
   # Attempt to retrieve an existing token
   token <- tryCatch(get("token", envir = dimensions_env),
                     error = function(e) stop("Invalid authentication token. Please ensure you are logged in using 'dimensions_login()' before querying.",
                                              call. = FALSE))
-
   return(token)
 }
