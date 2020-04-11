@@ -64,12 +64,12 @@ do_query <- function(query, token, retry = 0) {
   if (r$status_code == 403) {
     message(paste0("403 Forbidden: Login token expired. ",
             "Refreshing login token and trying again..."))
-    token <- refresh_token()
+    refresh_token()
     retry <- retry + 1
     do_query(query, token, retry)
   } else if (r$status_code == 429) {
     message("429 Too many requests. Sleeping for 30 seconds then retrying...")
-    sys.sleep(30)
+    Sys.sleep(30)
     retry <- retry + 1
     do_query(query, token, retry)
   } else if (r$status_code %in% c(200, 400, 500)) {
